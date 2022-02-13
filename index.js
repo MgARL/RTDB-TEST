@@ -1,6 +1,15 @@
 const express = require('express')
 const app = express()
+const bodyParser = require('body-parser')
+const cors = require('cors')
 require('dotenv').config()
+
+//cors allowed urls
+app.use(
+    cors({
+        origin: 'http://localhost:5500',
+    })
+)
 
 const { initializeApp } = require('firebase/app')
 const { getDatabase, ref, set, get, child } = require('firebase/database')
@@ -24,6 +33,8 @@ const firebaseConfig = {
 const FireApp = initializeApp(firebaseConfig);
 const database = getDatabase(FireApp);
 
+app.use(express.static('public'))
+
 
 
 app.get('/getdb',(req, res) =>{
@@ -39,8 +50,16 @@ app.get('/getdb',(req, res) =>{
     })
 })
 
-app.post('/dbpost',(req,res) =>{
+// Body parser
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
 
+app.post('/dbpost',(req,res) =>{
+    const dbRef = ref(database, '/leaderBoard');
+    set(dbRef, req.body)
+
+    console.log(req.body)
+    res.json(req.body)
 })
 
 app.get('*',(req,res) => {
